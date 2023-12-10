@@ -6,8 +6,8 @@ The Resources Bookings Service is a service designed to manage and control both 
 
 ## Documentation
 1. Marketing
-    1. [Target audience](./docs/01-marketing/01-target audience.md)
-    2. [User portraits](./docs/01-marketing/02-user portraits.md)
+    1. [Target audience](./docs/01-marketing/01-target%20audience.md)
+    2. [User portraits](./docs/01-marketing/02-user%20portraits.md)
     3. [MVP](./docs/01-marketing/03-mvp.md)
     4. [Api and Entities](./docs/02-architecture/01-Api%20and%20Entities.md)
     5. [Architecture scheme](./docs/02-architecture/02-architecture%20scheme.md)
