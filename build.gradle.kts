@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm") apply false
 }
 
-group = "com.crowdproj"
+group = "com.crowdproj.resources.bookings"
 version = "1.0-SNAPSHOT"
 
 allprojects {
