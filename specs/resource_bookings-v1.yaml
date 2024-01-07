@@ -1,0 +1,418 @@
+openapi: 3.0.3
+info:
+  title: "Resources bookings ${VERSION_APP}"
+  description:  This is a service designed to manage and control both available and booked timeslots
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/v1
+tags:
+  - name: timeslot
+    description: A unique time period during which a specific resource is available or reserved
+paths:
+  /timeslot/create:
+    post:
+      tags:
+        - timeslot
+      summary: Create timeslot
+      operationId: timeslotCreate
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeslotCreateRequest'
+        required: true
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeslotCreateResponse'
+  /timeslot/read:
+    post:
+      tags:
+        - timeslot
+      summary: Read timeslot
+      operationId: timeslotRead
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeslotReadRequest'
+        required: true
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeslotReadResponse'
+  /timeslot/update:
+    post:
+      tags:
+        - timeslot
+      summary: Update timeslot
+      operationId: timeslotUpdate
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeslotUpdateRequest'
+        required: true
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeslotUpdateResponse'
+  /timeslot/delete:
+    post:
+      tags:
+        - timeslot
+      summary: Delete timeslot
+      operationId: timeslotDelete
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeslotDeleteRequest'
+        required: true
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeslotDeleteResponse'
+  /timeslot/search:
+    post:
+      tags:
+        - timeslot
+      summary: Search timeslot
+      operationId: timeslotSearch
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeslotSearchRequest'
+        required: true
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeslotSearchResponse'
+
+components:
+  schemas:
+
+    IRequest:
+      type: object
+      description: Basic interface for all requests
+      properties:
+        requestType:
+          type: string
+          description: Discriminator field for determining the type of request
+          example: create
+        requestId:
+          type: string
+          description: Request identifier for debugging
+      discriminator:
+        propertyName: requestType
+        mapping:
+          create: '#/components/schemas/TimeslotCreateRequest'
+          read:   '#/components/schemas/TimeslotReadRequest'
+          update: '#/components/schemas/TimeslotUpdateRequest'
+          delete: '#/components/schemas/TimeslotDeleteRequest'
+          search: '#/components/schemas/TimeslotSearchRequest'
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        group:
+          type: string
+        field:
+          type: string
+        message:
+          type: string
+
+    ResponseResult:
+      type: string
+      enum:
+        - success
+        - error
+
+    IResponse:
+      type: object
+      description: Basic interface for all responses
+      properties:
+        responseType:
+          type: string
+          description: Discriminator field for determining the type of request
+          example: create
+        requestId:
+          type: string
+          description: Request identifier for debugging
+        result:
+          $ref: '#/components/schemas/ResponseResult'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+
+      discriminator:
+        propertyName: responseType
+        mapping:
+          create: '#/components/schemas/TimeslotCreateResponse'
+          read:   '#/components/schemas/TimeslotReadResponse'
+          update: '#/components/schemas/TimeslotUpdateResponse'
+          delete: '#/components/schemas/TimeslotDeleteResponse'
+          search: '#/components/schemas/TimeslotSearchResponse'
+          init: '#/components/schemas/TimeslotInitResponse'
+
+
+    TimeslotId:
+      type: string
+      description: unique identifier of the timeslot
+    UserId:
+      type: string
+      description: unique identifier of the user
+    ResourceId:
+      type: string
+      description: unique identifier of the resource
+    TimeslotLock:
+      type: string
+      description: Optimistic Locking Version
+    
+    BaseTimeslot:
+      type: object
+      description: The object describes properties that are common for both create and update.
+      properties:
+        userId:
+          $ref: '#/components/schemas/UserId'
+        resourceId:
+          $ref: '#/components/schemas/ResourceId'
+        startTime:
+          type: string
+          description: a temporal marker indicating the start of the timeslot
+        endTime:
+          type: string
+          description: a temporal marker indicating the end of the timeslot
+        bookingStatus:
+          $ref: '#/components/schemas/TimeslotBookingStatus'
+
+    TimeslotBookingStatus:
+      type: string
+      description: status of the timeslot's booking
+      enum:
+        - booked
+        - free
+
+    TimeslotInitResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+
+    TimeslotCreateObject:
+      allOf:
+        - $ref: '#/components/schemas/BaseTimeslot'
+
+    TimeslotCreateRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: '#/components/schemas/TimeslotRequestDebug'
+        - type: object
+          properties:
+            timeslot:
+              $ref: '#/components/schemas/TimeslotCreateObject'
+
+    TimeslotReadObject:
+      allOf:
+        - type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/TimeslotId'
+
+    TimeslotReadRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: '#/components/schemas/TimeslotRequestDebug'
+        - type: object
+          properties:
+            timeslot:
+              $ref: '#/components/schemas/TimeslotReadObject'
+
+    TimeslotUpdateObject:
+      allOf:
+        - $ref: '#/components/schemas/BaseTimeslot'
+        - type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/TimeslotId'
+            lock:
+              $ref: '#/components/schemas/TimeslotLock'
+
+    TimeslotUpdateRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: '#/components/schemas/TimeslotRequestDebug'
+        - type: object
+          properties:
+            timeslot:
+              $ref: '#/components/schemas/TimeslotUpdateObject'
+
+    TimeslotDeleteObject:
+      allOf:
+        - type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/TimeslotId'
+            lock:
+              $ref: '#/components/schemas/TimeslotLock'
+
+    TimeslotDeleteRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: '#/components/schemas/TimeslotRequestDebug'
+        - type: object
+          properties:
+            timeslot:
+              $ref: '#/components/schemas/TimeslotDeleteObject'
+
+    TimeslotSearchFilter:
+      type: object
+      description: Filters set for searching
+      properties:
+        searchAttribute:
+          type: string
+          description: The name of the attribute for search
+          example: userid
+        searchValue:
+          type: string
+          description: the value used for searching
+
+    TimeslotSearchRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: '#/components/schemas/TimeslotRequestDebug'
+        - type: object
+          properties:
+            timeslotFilter:
+              $ref: '#/components/schemas/TimeslotSearchFilter'
+
+    TimeslotResponseObject:
+      allOf:
+        - $ref: '#/components/schemas/BaseTimeslot'
+        - type: object
+          description: The object returned in the backend response.
+          properties:
+            id:
+              $ref: '#/components/schemas/TimeslotId'
+            ownerId:
+              $ref: '#/components/schemas/UserId'
+            lock:
+              $ref: '#/components/schemas/TimeslotLock'
+            permissions:
+              type: array
+              uniqueItems: true
+              items:
+                $ref: '#/components/schemas/TimeslotPermissions'
+
+    TimeslotPermissions:
+      type: string
+      description: Access rights for the client for operations on the timeslot.
+      enum:
+        - read
+        - update
+        - delete
+
+    TimeslotResponseSingle:
+      allOf:
+        - type: object
+          description: Ответ с одним объектом объявления
+          properties:
+            timeslot:
+              $ref: '#/components/schemas/TimeslotResponseObject'
+
+    TimeslotResponseMulti:
+      allOf:
+        - type: object
+          description: List of found objects
+          properties:
+            timeslots:
+              type: array
+              items:
+                $ref: '#/components/schemas/TimeslotResponseObject'
+
+    TimeslotCreateResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: '#/components/schemas/TimeslotResponseSingle'
+
+    TimeslotReadResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: '#/components/schemas/TimeslotResponseSingle'
+
+    TimeslotUpdateResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: '#/components/schemas/TimeslotResponseSingle'
+
+    TimeslotDeleteResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: '#/components/schemas/TimeslotResponseSingle'
+
+    TimeslotSearchResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: '#/components/schemas/TimeslotResponseMulti'
+
+    # STUBS ======================
+    TimeslotRequestDebugMode:
+      type: string
+      enum:
+        - prod
+        - test
+        - stub
+
+    TimeslotRequestDebug:
+      type: object
+      properties:
+        debug:
+          $ref: '#/components/schemas/TimeslotDebug'
+
+    TimeslotDebug:
+      type: object
+      properties:
+        mode:
+          $ref: '#/components/schemas/TimeslotRequestDebugMode'
+        stub:
+          $ref: '#/components/schemas/TimeslotRequestDebugStubs'
+
+    TimeslotRequestDebugStubs:
+      type: string
+      description: Enumerate all stabs
+      enum:
+        - success
+        - notFound
+        - badId
+        - badOwnerId
+        - badResourceId
+        - badBookingStatus
+        - badStartTime
+        - badEndTime
+        - cannotDelete
+        - badSearchString

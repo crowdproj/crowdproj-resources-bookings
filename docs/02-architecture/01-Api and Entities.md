@@ -2,15 +2,17 @@
 
 #### data class TimeSlot
     val id: Long,
+    val ownerId: Long
     val resourceID: Long,
     val startTime: LocalDateTime,
     val endTime: LocalDateTime,
-    val isBooked: Boolean = false
+    val bookingStatus: String = free
 
 - id - unique identifier of the timeslot.
-- resourceID - unique identifier of the resource
+- ownerId - unique identifier of the user who create timeslot.
+- resourceID - unique identifier of the resource.
 - startTime and endTime - temporal markers indicating the start and end of the timeslot.
-- isBooked - a flag indicating whether the timeslot is booked. By default, it is set to false.
+- bookingStatus - a variable indicating whether the timeslot is booked.
 
 ## API
 1. CRUDS(Create, Read, Update, Delete, Search)
