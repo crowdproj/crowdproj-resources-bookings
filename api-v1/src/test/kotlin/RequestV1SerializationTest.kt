@@ -10,14 +10,14 @@ class RequestV1SerializationTest {
         requestId = "123",
         debug = TimeslotDebug(
             mode = TimeslotRequestDebugMode.STUB,
-            stub = TimeslotRequestDebugStubs.BAD_TITLE
+            stub = TimeslotRequestDebugStubs.SUCCESS
         ),
         timeslot = TimeslotCreateObject(
             userId = "123",
             resourceId = "123",
             startTime = "2022-01-01T00:00:00.000Z",
             endTime = "2023-01-01T00:00:00.000Z",
-            isBooked = "false"
+            bookingStatus = TimeslotBookingStatus.FREE
         )
     )
 
@@ -25,13 +25,13 @@ class RequestV1SerializationTest {
     fun serialize() {
         val json = apiV1Mapper.writeValueAsString(request)
 
-        assertContains(json, Regex("\"isBooked\":\\s*\"false\""))
+        assertContains(json, Regex("\"bookingStatus\":\\s*\"free\""))
         assertContains(json, Regex("\"userId\":\\s*\"123\""))
         assertContains(json, Regex("\"resourceId\":\\s*\"123\""))
         assertContains(json, Regex("\"startTime\":\\s*\"2022-01-01T00:00:00.000Z\""))
         assertContains(json, Regex("\"endTime\":\\s*\"2023-01-01T00:00:00.000Z\""))
         assertContains(json, Regex("\"mode\":\\s*\"stub\""))
-        assertContains(json, Regex("\"stub\":\\s*\"badTitle\""))
+        assertContains(json, Regex("\"stub\":\\s*\"success\""))
         assertContains(json, Regex("\"requestType\":\\s*\"create\""))
     }
 

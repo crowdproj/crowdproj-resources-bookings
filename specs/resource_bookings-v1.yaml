@@ -210,9 +210,15 @@ components:
         endTime:
           type: string
           description: a temporal marker indicating the end of the timeslot
-        isBooked:
-          type: string
-          description: a flag indicating whether the timeslot is booked
+        bookingStatus:
+          $ref: '#/components/schemas/TimeslotBookingStatus'
+
+    TimeslotBookingStatus:
+      type: string
+      description: status of the timeslot's booking
+      enum:
+        - booked
+        - free
 
     TimeslotInitResponse:
       allOf:
@@ -398,13 +404,15 @@ components:
 
     TimeslotRequestDebugStubs:
       type: string
-      description: Перечисления всех стабов
+      description: Enumerate all stabs
       enum:
         - success
         - notFound
         - badId
-        - badTitle
-        - badDescription
-        - badVisibility
+        - badOwnerId
+        - badResourceId
+        - badBookingStatus
+        - badStartTime
+        - badEndTime
         - cannotDelete
         - badSearchString

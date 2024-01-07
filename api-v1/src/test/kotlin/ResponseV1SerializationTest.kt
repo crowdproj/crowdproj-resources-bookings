@@ -13,7 +13,7 @@ class ResponseV1SerializationTest {
             resourceId = "123",
             startTime = "2022-01-01T00:00:00.000Z",
             endTime = "2023-01-01T00:00:00.000Z",
-            isBooked = "false"
+            bookingStatus = TimeslotBookingStatus.FREE
         )
     )
 
@@ -21,7 +21,7 @@ class ResponseV1SerializationTest {
     fun serialize() {
         val json = apiV1Mapper.writeValueAsString(response)
 
-        assertContains(json, Regex("\"isBooked\":\\s*\"false\""))
+        assertContains(json, Regex("\"bookingStatus\":\\s*\"free\""))
         assertContains(json, Regex("\"userId\":\\s*\"123\""))
         assertContains(json, Regex("\"resourceId\":\\s*\"123\""))
         assertContains(json, Regex("\"startTime\":\\s*\"2022-01-01T00:00:00.000Z\""))

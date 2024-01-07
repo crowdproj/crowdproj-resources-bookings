@@ -1,59 +1,54 @@
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
 plugins {
-    kotlin("jvm")
-    id("org.openapi.generator")
+    kotlin("multiplatform")
+    id("com.crowdproj.generator")
+    kotlin("plugin.serialization")
 }
 
-sourceSets {
-    main {
-        java.srcDir(layout.buildDirectory.dir("generate-resources/main/src/main/kotlin"))
+crowdprojGenerate {
+    packageName.set("${project.group}.api.v1")
+    inputSpec.set("$rootDir/specs/resource_bookings-v1.yaml")
+}
+
+kotlin {
+    jvm { withJava() }
+    linuxX64 { }
+
+    sourceSets {
+        val serializationVersion: String by project
+        val commonMain by getting {
+            kotlin.srcDirs(layout.buildDirectory.dir("generate-resources/main/src/commonMain/kotlin"))
+            dependencies {
+                implementation(kotlin("stdlib-common"))
+
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test-common"))
+                implementation(kotlin("test-annotations-common"))
+            }
+        }
+        val jvmTest by getting {
+            dependencies {
+                implementation(kotlin("test-junit"))
+            }
+        }
     }
-}
-
-/**
- * Настраиваем генерацию здесь
- */
-openApiGenerate {
-    val openapiGroup = "${rootProject.group}.api.v1"
-    generatorName.set("kotlin") // Это и есть активный генератор
-    packageName.set(openapiGroup)
-    apiPackage.set("$openapiGroup.api")
-    modelPackage.set("$openapiGroup.models")
-    invokerPackage.set("$openapiGroup.invoker")
-    inputSpec.set("$rootDir/specs/specs-resource_booking-v1.yaml")
-
-    /**
-     * Здесь указываем, что нам нужны только модели, все остальное не нужно
-     * https://openapi-generator.tech/docs/globals
-     */
-    globalProperties.apply {
-        put("models", "")
-        put("modelDocs", "false")
-    }
-
-    /**
-     * Настройка дополнительных параметров из документации по генератору
-     * https://github.com/OpenAPITools/openapi-generator/blob/master/docs/generators/kotlin.md
-     */
-    configOptions.set(
-        mapOf(
-            "dateLibrary" to "string",
-            "enumPropertyNaming" to "UPPERCASE",
-            "serializationLibrary" to "jackson",
-            "collectionType" to "list"
-        )
-    )
-}
-
-dependencies {
-    val jacksonVersion: String by project
-    implementation(kotlin("stdlib"))
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
-    testImplementation(kotlin("test-junit"))
 }
 
 tasks {
-    compileKotlin {
-        dependsOn(openApiGenerate)
+    val openApiGenerateTask: GenerateTask = getByName("openApiGenerate", GenerateTask::class) {
+        outputDir.set(layout.buildDirectory.file("generate-resources/main/src/commonMain/kotlin").get().toString())
+        mustRunAfter("compileCommonMainKotlinMetadata")
+    }
+    filter { it.name.startsWith("compile") }.forEach {
+        it.dependsOn(openApiGenerateTask)
+    }
+    build {
+        dependsOn("jvmJar")
     }
 }
